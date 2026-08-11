@@ -1,0 +1,27 @@
+name: Feature request
+description: Suggest a reversible, device-owner focused improvement
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes:
+      label: User problem
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Detection, verification and rollback
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Project boundaries
+      options:
+        - label: This does not require generic command execution, arbitrary property writes or redistribution of proprietary firmware/APKs.
+          required: true
+

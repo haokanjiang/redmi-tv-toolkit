@@ -1,0 +1,6 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/haiktl/redmi-tv-toolkit/security/advisories/new
+    about: Report privilege or authorization issues privately.
+

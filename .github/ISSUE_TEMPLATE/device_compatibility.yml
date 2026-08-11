@@ -1,0 +1,40 @@
+name: Device compatibility
+description: Propose or report testing on another Xiaomi/Redmi TV firmware
+title: "[Compatibility]: "
+labels: [compatibility]
+body:
+  - type: checkboxes
+    attributes:
+      label: Authorization and privacy
+      options:
+        - label: I own or am authorized to administer this device.
+          required: true
+        - label: The attached data is redacted and contains no keys or account data.
+          required: true
+  - type: input
+    attributes:
+      label: Product model
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Device, board and SoC (if known)
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Full firmware build ID
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Result
+      options: [Diagnosis only, Setup succeeded, Setup partially succeeded, Rolled back]
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Redacted evidence
+    validations:
+      required: true
+

@@ -1,0 +1,34 @@
+# Build output
+app/build/
+app/dist/
+.cache/
+
+# Local state and backups
+.redmi-tv-toolkit/
+backups/
+*.log
+
+# Android / signing secrets
+*.jks
+*.keystore
+*.pem
+*.key
+adbkey
+adbkey.pub
+.android/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Never publish extracted firmware or device evidence
+out/
+packages/
+adb_logs/
+dumpsys/
+screenshots/
+tmp/
+
