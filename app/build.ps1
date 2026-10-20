@@ -1,5 +1,6 @@
 [CmdletBinding()]
 param(
+    [ValidateSet("MFTR0", "Blueplanet")][string]$DeviceProfile = "MFTR0",
     [string]$SdkRoot = $env:ANDROID_SDK_ROOT,
     [string]$JavaHomePath = $env:JAVA_HOME,
     [string]$BuildRoot,
@@ -103,8 +104,16 @@ if (Test-Path -LiteralPath $BuildRoot) {
 }
 New-Item -ItemType Directory -Force -Path $GeneratedRoot, $ClassesRoot, $DexRoot, $DistRoot | Out-Null
 
+# The previously verified blueplanet provider is target-SDK sensitive. Keep its
+# legacy target in a separate artifact; both variants retain the same capability guards.
+$ManifestPath = Join-Path $BuildRoot "AndroidManifest.xml"
+$manifest = Get-Content -LiteralPath (Join-Path $AppRoot "AndroidManifest.xml") -Raw
+if ($DeviceProfile -eq "Blueplanet") { $manifest = $manifest.Replace('targetSdkVersion="34"', 'targetSdkVersion="29"') }
+[IO.File]::WriteAllText($ManifestPath, $manifest, [Text.UTF8Encoding]::new($false))
+$ApkName = if ($DeviceProfile -eq "Blueplanet") { "redmi-tv-toolkit-blueplanet.apk" } else { "redmi-tv-toolkit.apk" }
+
 & $Aapt package -f -m `
-    -M (Join-Path $AppRoot "AndroidManifest.xml") `
+    -M $ManifestPath `
     -S (Join-Path $AppRoot "res") `
     -I $AndroidJar `
     -J $GeneratedRoot
@@ -118,7 +127,7 @@ $Sources = @(
         ForEach-Object FullName
 )
 
-& $Javac --release 8 -g:none -encoding UTF-8 -classpath $AndroidJar -d $ClassesRoot $Sources
+& $Javac --release 8 -g:source,lines -encoding UTF-8 -classpath $AndroidJar -d $ClassesRoot $Sources
 if ($LASTEXITCODE -ne 0) { throw "javac failed" }
 
 $ClassesJar = Join-Path $BuildRoot "classes.jar"
@@ -131,7 +140,7 @@ finally {
     Pop-Location
 }
 
-& $D8 --min-api 23 --output $DexRoot $ClassesJar
+& $D8 --min-api 24 --lib $AndroidJar --output $DexRoot $ClassesJar
 $DexFile = Join-Path $DexRoot "classes.dex"
 if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $DexFile)) {
     # Build-tools 29's D8 launcher can exit successfully without output on
@@ -140,7 +149,7 @@ if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $DexFile)) {
     if (-not (Test-Path -LiteralPath $DxJar)) {
         throw "d8 failed to create classes.dex and no dx.jar fallback is available"
     }
-    & $Java -Xmx1024M -jar $DxJar --dex --min-sdk-version=23 `
+    & $Java -Xmx1024M -jar $DxJar --dex --min-sdk-version=24 `
         "--output=$DexFile" $ClassesJar
     if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $DexFile)) {
         throw "dex conversion failed"
@@ -150,10 +159,10 @@ if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $DexFile)) {
 $UnsignedApk = Join-Path $BuildRoot "redmi-tv-toolkit-unsigned.apk"
 $AlignedApk = Join-Path $BuildRoot "redmi-tv-toolkit-aligned.apk"
 $SignedTempApk = Join-Path $BuildRoot "redmi-tv-toolkit.apk"
-$SignedApk = Join-Path $DistRoot "redmi-tv-toolkit.apk"
+$SignedApk = Join-Path $DistRoot $ApkName
 
 & $Aapt package -f `
-    -M (Join-Path $AppRoot "AndroidManifest.xml") `
+    -M $ManifestPath `
     -S (Join-Path $AppRoot "res") `
     -I $AndroidJar `
     -F $UnsignedApk
@@ -203,7 +212,7 @@ Copy-Item -LiteralPath $SignedTempApk -Destination $SignedApk -Force
 
 $Hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $SignedApk).Hash.ToLowerInvariant()
 $HashFile = "$SignedApk.sha256"
-Set-Content -LiteralPath $HashFile -Value "$Hash  redmi-tv-toolkit.apk" -Encoding ascii
+Set-Content -LiteralPath $HashFile -Value "$Hash  $ApkName" -Encoding ascii
 
 Write-Host "Built: $SignedApk"
 Write-Host "SHA-256: $Hash"

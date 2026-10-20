@@ -1,13 +1,54 @@
-[CmdletBinding()]
-param([string]$Device=$env:TV_HOST,[string]$AdbPath,[switch]$List,[switch]$Status,[switch]$Restore,[int]$Select=-1,[switch]$Help)
-$ErrorActionPreference="Stop"; . (Join-Path $PSScriptRoot "common.ps1")
-if($Help){Write-Host ".\scripts\manage-home.ps1 -Device HOST:5555 [-List|-Status|-Restore|-Select N]";exit 0}
-if(!$Device){throw "Pass -Device or set TV_HOST"};$adb=Resolve-ToolkitAdb $AdbPath;Connect-ToolkitDevice $adb $Device; $info=Get-ToolkitDeviceInfo $adb $Device;Assert-ToolkitCompatibility $info
-$cands=@(Get-ToolkitLaunchCandidates $adb $Device | Where-Object { $_.IsHome })
-if($List){$i=0;foreach($c in $cands){$i++;Write-Host "[$i] $($c.Package) $($c.Activity) [$($c.Category)]"};exit 0}
-if($Status){$statusOutput=(Invoke-ToolkitAdb $adb $Device @("shell","am","broadcast","-a","com.redmi.tvtoolkit.action.HOME_STATUS","-n","com.redmi.tvtoolkit/.ToolkitControlReceiver") -AllowFailure|Out-String).Trim();[ordered]@{Device="$($info.Model)/$($info.Device)";SystemHome=Get-ToolkitHome $adb $Device;Accessibility=Get-ToolkitSetting $adb $Device secure enabled_accessibility_services;ToolkitServiceBound=((Invoke-ToolkitAdb $adb $Device @("shell","dumpsys","accessibility") -AllowFailure|Out-String)-match "com.redmi.tvtoolkit/com.redmi.tvtoolkit.HomeOverrideService");Config=$statusOutput}|ConvertTo-Json -Depth 4;exit 0}
-if($Restore){Invoke-ToolkitAdb $adb $Device @("shell","am","broadcast","-a","com.redmi.tvtoolkit.action.HOME_RESTORE","-n","com.redmi.tvtoolkit/.ToolkitControlReceiver")|Out-Null;$cur=Get-ToolkitSetting $adb $Device secure enabled_accessibility_services;Set-ToolkitSetting $adb $Device secure enabled_accessibility_services (Merge-ToolkitAccessibilityServices $cur -Remove);Write-Host "Home Override restored; system Home was not changed.";exit 0}
-if($Select -lt 0){$i=0;foreach($c in $cands){$i++;Write-Host "[$i] $($c.Package) $($c.Activity) [$($c.Category)]"};$Select=[int](Read-Host "Select launcher number")};if($Select -lt 1 -or $Select -gt $cands.Count){throw "Invalid launcher number"};$target=$cands[$Select-1].Component;$previous=Get-ToolkitHome $adb $Device;$cur=Get-ToolkitSetting $adb $Device secure enabled_accessibility_services;$merged=Merge-ToolkitAccessibilityServices $cur;Set-ToolkitSetting $adb $Device secure enabled_accessibility_services $merged;Set-ToolkitSetting $adb $Device secure accessibility_enabled "1";Invoke-ToolkitAdb $adb $Device @("shell","am","broadcast","-a","com.redmi.tvtoolkit.action.HOME_SET","-n","com.redmi.tvtoolkit/.ToolkitControlReceiver","--es","target",$target,"--es","fallback",$previous)|Out-Null;Invoke-ToolkitAdb $adb $Device @("shell","monkey","-p",$target.Split('/')[0],"1") -AllowFailure|Out-Null;Write-Host "Selected $target. Previous system Home: $previous"
-
-
-
+[CmdletBinding(DefaultParameterSetName="Interactive")]
+param(
+    [string]$Device=$env:TV_HOST,
+    [string]$AdbPath,
+    [Parameter(ParameterSetName="List")][switch]$List,
+    [Parameter(ParameterSetName="Status")][switch]$Status,
+    [Parameter(ParameterSetName="Restore")][switch]$Restore,
+    [Parameter(ParameterSetName="Number",Mandatory=$true)][ValidateRange(1,2147483647)][int]$Select,
+    [Parameter(ParameterSetName="Component",Mandatory=$true)][string]$TargetComponent,
+    [Parameter(ParameterSetName="Number")][Parameter(ParameterSetName="Component")][string]$FallbackComponent,
+    [Parameter(ParameterSetName="Help")][switch]$Help
+)
+$ErrorActionPreference="Stop"
+. (Join-Path $PSScriptRoot "common.ps1")
+if ($Help) {
+    Write-Host "manage-home.ps1 -Device HOST:PORT [-List|-Status|-Restore|-Select N|-TargetComponent PACKAGE/ACTIVITY]"
+    Write-Host "HOME entries are desktops; LEANBACK-only entries are TV apps, labelled separately."
+    return
+}
+if (-not $Device) { throw "Pass -Device or set TV_HOST" }
+$adb=Resolve-ToolkitAdb $AdbPath
+Connect-ToolkitDevice $adb $Device
+$info=Get-ToolkitDeviceInfo $adb $Device
+Assert-ToolkitCompatibility $info
+if ($Status) {
+    $state = Invoke-ToolkitControl $adb $Device HOME_STATUS
+    [ordered]@{Device=$info; SystemHome=Get-ToolkitHome $adb $Device; Toolkit=$state} | ConvertTo-Json -Depth 6
+    return
+}
+if ($Restore) {
+    $ack = Invoke-ToolkitControl $adb $Device HOME_RESTORE
+    $state = Invoke-ToolkitControl $adb $Device HOME_STATUS
+    if ($state.enabled -or $state.recovery) { throw "Restore read-back failed" }
+    Write-Host "Verified: Home Override and boot recovery disabled."
+    return
+}
+$candidates=@(Get-ToolkitLaunchCandidates $adb $Device)
+if ($List -or $PSCmdlet.ParameterSetName -eq "Interactive") {
+    for ($i=0; $i -lt $candidates.Count; $i++) {
+        $entry=$candidates[$i]
+        $label=if($entry.IsHome){"HOME desktop"}else{"LEANBACK TV entry (not a HOME desktop)"}
+        Write-Host "[$($i+1)] $($entry.Component) [$label]"
+    }
+    if ($List) { return }
+    $number=[int](Read-Host "Select an entry number (0 cancels)")
+    if ($number -eq 0) { return }
+} else { $number=$Select }
+if (-not $TargetComponent) {
+    if ($number -lt 1 -or $number -gt $candidates.Count) { throw "Invalid selection" }
+    $TargetComponent=$candidates[$number-1].Component
+}
+$options=@{Adb=$adb;Device=$Device;TargetComponent=$TargetComponent}
+if ($PSBoundParameters.ContainsKey("FallbackComponent")) {$options.FallbackComponent=$FallbackComponent}
+Set-ToolkitTarget @options | Out-Null

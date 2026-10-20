@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.redmi.tvtoolkit" android:versionCode="2" android:versionName="0.2.0">
- <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="34"/>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.redmi.tvtoolkit" android:versionCode="4" android:versionName="0.4.0">
+ <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="34"/>
  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
  <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"/>
  <uses-feature android:name="android.software.leanback" android:required="false"/>
@@ -13,7 +13,7 @@
   <activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/><category android:name="android.intent.category.LEANBACK_LAUNCHER"/></intent-filter></activity>
   <activity android:name=".ControlActivity" android:exported="true" android:permission="android.permission.DUMP" android:theme="@android:style/Theme.NoDisplay"/>
   <receiver android:name=".ToolkitControlReceiver" android:exported="true" android:permission="android.permission.DUMP"/>
-  <receiver android:name=".BootReceiver" android:exported="true" android:directBootAware="true"><intent-filter><action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.USER_UNLOCKED"/><action android:name="android.intent.action.MY_PACKAGE_REPLACED"/></intent-filter></receiver>
+  <receiver android:name=".BootReceiver" android:exported="false" android:directBootAware="true"><intent-filter><action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.USER_UNLOCKED"/><action android:name="android.intent.action.MY_PACKAGE_REPLACED"/></intent-filter></receiver>
   <service android:name=".HomeOverrideService" android:exported="true" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" android:label="@string/home_override_name"><intent-filter><action android:name="android.accessibilityservice.AccessibilityService"/></intent-filter><meta-data android:name="android.accessibilityservice" android:resource="@xml/home_override_service"/></service>
   <service android:name=".BootAccessibilityService" android:exported="true" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" android:label="@string/accessibility_name"><intent-filter><action android:name="android.accessibilityservice.AccessibilityService"/></intent-filter><meta-data android:name="android.accessibilityservice" android:resource="@xml/accessibility_service"/></service>
   <service android:name=".RecoveryService" android:exported="false"/><service android:name=".RecoveryJobService" android:exported="false" android:permission="android.permission.BIND_JOB_SERVICE"/>

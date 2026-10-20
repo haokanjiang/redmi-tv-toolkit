@@ -32,3 +32,6 @@ dumpsys/
 screenshots/
 tmp/
 
+
+__pycache__/
+*.pyc

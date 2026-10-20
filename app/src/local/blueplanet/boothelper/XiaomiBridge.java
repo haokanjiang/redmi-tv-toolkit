@@ -18,7 +18,7 @@ final class XiaomiBridge {
     private XiaomiBridge() {}
 
     static void setStartupMediator(Context context) {
-        if (!DeviceProfile.detect().blueplanet) {
+        if (!DeviceProfile.detect().capabilities.tvManagerBridge) {
             return;
         }
         Bundle extras = new Bundle();
@@ -27,7 +27,7 @@ final class XiaomiBridge {
     }
 
     static void restoreStartupSetting(Context context, String packageName) {
-        if (!DeviceProfile.detect().blueplanet) {
+        if (!DeviceProfile.detect().capabilities.tvManagerBridge) {
             return;
         }
         String safeValue = packageName == null ? "" : packageName.trim();
@@ -43,7 +43,7 @@ final class XiaomiBridge {
     }
 
     static void restartAdbd(Context context) {
-        if (!DeviceProfile.detect().blueplanet) {
+        if (!DeviceProfile.detect().capabilities.tvManagerBridge) {
             return;
         }
         Bundle extras = new Bundle();
@@ -53,6 +53,9 @@ final class XiaomiBridge {
     }
 
     private static Bundle call(Context context, String method, Bundle extras) {
+        if (!DeviceProfile.detect().capabilities.tvManagerBridge) {
+            throw new SecurityException("vendor bridge not available for this device");
+        }
         try {
             return context.getContentResolver().call(
                     PROVIDER, method, TVMANAGER_PACKAGE, extras);
@@ -62,6 +65,3 @@ final class XiaomiBridge {
         }
     }
 }
-
-
-

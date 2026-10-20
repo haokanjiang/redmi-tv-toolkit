@@ -1,16 +1,38 @@
 package com.redmi.tvtoolkit;
+
 import android.os.Build;
+
 public final class DeviceProfile {
-    public final String id; public final boolean supported, homeOverride, bootRecovery, blueplanet;
-    public final String systemHome, fallbackHome;
-    private DeviceProfile(String id, boolean supported, boolean homeOverride, boolean bootRecovery, boolean blueplanet, String systemHome, String fallbackHome) {
-        this.id=id; this.supported=supported; this.homeOverride=homeOverride; this.bootRecovery=bootRecovery; this.blueplanet=blueplanet; this.systemHome=systemHome; this.fallbackHome=fallbackHome;
+    private static DeviceProfile cached;
+    final DeviceCapabilities capabilities;
+    public final String id;
+    public final boolean supported, homeOverride, bootRecovery, blueplanet;
+
+    private DeviceProfile(DeviceCapabilities c) {
+        capabilities = c;
+        id = c.id;
+        supported = !"unsupported".equals(id);
+        homeOverride = c.homeOverride;
+        bootRecovery = c.bootRecovery;
+        blueplanet = "blueplanet".equals(id);
     }
-    public static DeviceProfile detect() {
-        String d=Build.DEVICE==null?"":Build.DEVICE, m=Build.MODEL==null?"":Build.MODEL;
-        if ("freeguy".equalsIgnoreCase(d) || "MiTV-MFTR0".equalsIgnoreCase(m)) return new DeviceProfile("xiaomi-mftr0-freeguy", true, true, true, false, "com.mitv.tvhome", "com.xiaomi.mitv.settings/.entry.FallbackHome");
-        if ("blueplanet".equalsIgnoreCase(d) || "blueplanet".equalsIgnoreCase(Build.PRODUCT)) return new DeviceProfile("blueplanet", true, false, true, true, "", "");
-        return new DeviceProfile("unsupported", false, false, false, false, "", "");
+
+    public static synchronized DeviceProfile detect() {
+        if (cached != null) return cached;
+        String board = "";
+        // Never call a vendor provider to identify hardware.
+        if (!"freeguy".equalsIgnoreCase(Build.DEVICE)) {
+            try { board = DeviceGuard.readProperty("ro.board.platform"); }
+            catch (Exception ignored) { }
+        }
+        cached = new DeviceProfile(DeviceCapabilities.match(Build.MODEL, Build.DEVICE, Build.PRODUCT, board));
+        return cached;
     }
-    public boolean isSystemHome(String pkg, String cls) { return homeOverride && ("com.mitv.tvhome".equals(pkg) || ("com.xiaomi.mitv.settings".equals(pkg) && cls != null && cls.endsWith(".entry.FallbackHome"))); }
+
+    public boolean isSystemHome(String pkg, String cls) {
+        return homeOverride && ("com.mitv.tvhome".equals(pkg)
+                || ("com.xiaomi.mitv.settings".equals(pkg)
+                && ("com.xiaomi.mitv.settings.entry.FallbackHome".equals(cls)
+                || ".entry.FallbackHome".equals(cls))));
+    }
 }

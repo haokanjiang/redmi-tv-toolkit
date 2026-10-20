@@ -12,11 +12,19 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       - name: Run repository self-test
         shell: pwsh
         run: |
           ./scripts/self-test.ps1
-          ./tests/smoke.ps1
+          ./tests/run-java.ps1
+          ./tests/scripts.tests.ps1
 
   build-apk:
     runs-on: windows-latest
@@ -32,12 +40,15 @@ jobs:
         run: sdkmanager "platforms;android-34" "build-tools;35.0.0"
       - name: Build APK
         shell: pwsh
-        run: ./app/build.ps1
+        run: |
+          ./app/build.ps1
+          ./app/build.ps1 -DeviceProfile Blueplanet
       - uses: actions/upload-artifact@v4
         with:
           name: community-test-apk
           path: |
             app/dist/redmi-tv-toolkit.apk
             app/dist/redmi-tv-toolkit.apk.sha256
+            app/dist/redmi-tv-toolkit-blueplanet.apk
+            app/dist/redmi-tv-toolkit-blueplanet.apk.sha256
           if-no-files-found: error
-
