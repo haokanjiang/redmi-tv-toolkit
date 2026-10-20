@@ -29,7 +29,7 @@ jobs:
       - uses: android-actions/setup-android@v3
       - name: Install Android SDK packages
         shell: pwsh
-        run: sdkmanager "platforms;android-30" "build-tools;35.0.0"
+        run: sdkmanager "platforms;android-34" "build-tools;35.0.0"
       - name: Build APK
         shell: pwsh
         run: ./app/build.ps1
@@ -40,3 +40,4 @@ jobs:
             app/dist/redmi-tv-toolkit.apk
             app/dist/redmi-tv-toolkit.apk.sha256
           if-no-files-found: error
+

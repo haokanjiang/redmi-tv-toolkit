@@ -1,4 +1,4 @@
-package local.blueplanet.boothelper;
+package com.redmi.tvtoolkit;
 
 import android.content.Context;
 import android.net.Uri;
@@ -18,7 +18,7 @@ final class XiaomiBridge {
     private XiaomiBridge() {}
 
     static void setStartupMediator(Context context) {
-        if (!DeviceGuard.isSupportedDevice()) {
+        if (!DeviceProfile.detect().blueplanet) {
             return;
         }
         Bundle extras = new Bundle();
@@ -27,7 +27,7 @@ final class XiaomiBridge {
     }
 
     static void restoreStartupSetting(Context context, String packageName) {
-        if (!DeviceGuard.isSupportedDevice()) {
+        if (!DeviceProfile.detect().blueplanet) {
             return;
         }
         String safeValue = packageName == null ? "" : packageName.trim();
@@ -43,7 +43,7 @@ final class XiaomiBridge {
     }
 
     static void restartAdbd(Context context) {
-        if (!DeviceGuard.isSupportedDevice()) {
+        if (!DeviceProfile.detect().blueplanet) {
             return;
         }
         Bundle extras = new Bundle();
@@ -62,4 +62,6 @@ final class XiaomiBridge {
         }
     }
 }
+
+
 

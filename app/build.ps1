@@ -15,6 +15,9 @@ if (-not $SdkRoot) {
     $SdkRoot = $env:ANDROID_HOME
 }
 if (-not $SdkRoot) {
+    $SdkRoot = Join-Path ([Environment]::GetFolderPath("LocalApplicationData")) "Android\Sdk"
+}
+if (-not (Test-Path -LiteralPath $SdkRoot)) {
     throw "Set ANDROID_SDK_ROOT (or ANDROID_HOME) to an installed Android SDK."
 }
 if ($JavaHomePath) {
@@ -78,10 +81,10 @@ $Aapt = Join-Path $BuildTools "aapt.exe"
 $D8 = Join-Path $BuildTools "d8.bat"
 $Zipalign = Join-Path $BuildTools "zipalign.exe"
 $ApksignerJar = Join-Path $BuildTools "lib\apksigner.jar"
-$AndroidJar = Join-Path $SdkRoot "platforms\android-30\android.jar"
+$AndroidJar = Join-Path $SdkRoot "platforms\android-34\android.jar"
 
 if (-not (Test-Path -LiteralPath $AndroidJar)) {
-    throw "Android 30 platform is required: sdkmanager 'platforms;android-30'"
+    throw "Android 34 platform is required: sdkmanager 'platforms;android-34'"
 }
 
 if (-not $KeystorePath) {
@@ -204,3 +207,7 @@ Set-Content -LiteralPath $HashFile -Value "$Hash  redmi-tv-toolkit.apk" -Encodin
 
 Write-Host "Built: $SignedApk"
 Write-Host "SHA-256: $Hash"
+
+
+
+

@@ -1,0 +1,13 @@
+[CmdletBinding()]
+param([string]$Device=$env:TV_HOST,[string]$AdbPath,[switch]$List,[switch]$Status,[switch]$Restore,[int]$Select=-1,[switch]$Help)
+$ErrorActionPreference="Stop"; . (Join-Path $PSScriptRoot "common.ps1")
+if($Help){Write-Host ".\scripts\manage-home.ps1 -Device HOST:5555 [-List|-Status|-Restore|-Select N]";exit 0}
+if(!$Device){throw "Pass -Device or set TV_HOST"};$adb=Resolve-ToolkitAdb $AdbPath;Connect-ToolkitDevice $adb $Device; $info=Get-ToolkitDeviceInfo $adb $Device;Assert-ToolkitCompatibility $info
+$cands=@(Get-ToolkitLaunchCandidates $adb $Device | Where-Object { $_.IsHome })
+if($List){$i=0;foreach($c in $cands){$i++;Write-Host "[$i] $($c.Package) $($c.Activity) [$($c.Category)]"};exit 0}
+if($Status){$statusOutput=(Invoke-ToolkitAdb $adb $Device @("shell","am","broadcast","-a","com.redmi.tvtoolkit.action.HOME_STATUS","-n","com.redmi.tvtoolkit/.ToolkitControlReceiver") -AllowFailure|Out-String).Trim();[ordered]@{Device="$($info.Model)/$($info.Device)";SystemHome=Get-ToolkitHome $adb $Device;Accessibility=Get-ToolkitSetting $adb $Device secure enabled_accessibility_services;ToolkitServiceBound=((Invoke-ToolkitAdb $adb $Device @("shell","dumpsys","accessibility") -AllowFailure|Out-String)-match "com.redmi.tvtoolkit/com.redmi.tvtoolkit.HomeOverrideService");Config=$statusOutput}|ConvertTo-Json -Depth 4;exit 0}
+if($Restore){Invoke-ToolkitAdb $adb $Device @("shell","am","broadcast","-a","com.redmi.tvtoolkit.action.HOME_RESTORE","-n","com.redmi.tvtoolkit/.ToolkitControlReceiver")|Out-Null;$cur=Get-ToolkitSetting $adb $Device secure enabled_accessibility_services;Set-ToolkitSetting $adb $Device secure enabled_accessibility_services (Merge-ToolkitAccessibilityServices $cur -Remove);Write-Host "Home Override restored; system Home was not changed.";exit 0}
+if($Select -lt 0){$i=0;foreach($c in $cands){$i++;Write-Host "[$i] $($c.Package) $($c.Activity) [$($c.Category)]"};$Select=[int](Read-Host "Select launcher number")};if($Select -lt 1 -or $Select -gt $cands.Count){throw "Invalid launcher number"};$target=$cands[$Select-1].Component;$previous=Get-ToolkitHome $adb $Device;$cur=Get-ToolkitSetting $adb $Device secure enabled_accessibility_services;$merged=Merge-ToolkitAccessibilityServices $cur;Set-ToolkitSetting $adb $Device secure enabled_accessibility_services $merged;Set-ToolkitSetting $adb $Device secure accessibility_enabled "1";Invoke-ToolkitAdb $adb $Device @("shell","am","broadcast","-a","com.redmi.tvtoolkit.action.HOME_SET","-n","com.redmi.tvtoolkit/.ToolkitControlReceiver","--es","target",$target,"--es","fallback",$previous)|Out-Null;Invoke-ToolkitAdb $adb $Device @("shell","monkey","-p",$target.Split('/')[0],"1") -AllowFailure|Out-Null;Write-Host "Selected $target. Previous system Home: $previous"
+
+
+

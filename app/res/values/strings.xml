@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">红米电视恢复助手</string>
-    <string name="status_title">电视恢复服务正在运行</string>
-    <string name="status_text">正在恢复 Projectivy、无障碍和网络 ADB</string>
-    <string name="accessibility_name">红米电视恢复服务</string>
-    <string name="accessibility_description">不读取屏幕内容；只在固件关闭 ADB 时恢复开关。</string>
-    <string name="admin_name">红米电视恢复保护</string>
-    <string name="admin_description">降低 HyperOS 在开机后停止恢复服务的概率；不申请锁屏、密码或抹除策略。</string>
+ <string name="app_name">Redmi TV Toolkit</string>
+ <string name="status_title">Redmi TV Toolkit</string>
+ <string name="status_text">Home override and boot recovery status</string>
+ <string name="home_override_name">Home Override</string>
+ <string name="home_override_description">Redirects Xiaomi system Home windows to the selected launcher.</string>
+ <string name="accessibility_name">Toolkit boot recovery</string>
+ <string name="accessibility_description">Boot recovery helper; preserves other accessibility services.</string>
+ <string name="admin_name">Toolkit recovery</string>
+ <string name="admin_description">Legacy compatibility entry; no device policy is used.</string>
 </resources>
-

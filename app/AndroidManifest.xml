@@ -1,104 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="local.blueplanet.boothelper"
-    android:versionCode="1"
-    android:versionName="0.1.0">
-
-    <!-- targetSdk 29 is intentional: the verified Xiaomi Android 11 provider
-         path rejects callers targeting newer SDK levels. -->
-    <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="29" />
-
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-
-    <uses-feature android:name="android.software.leanback" android:required="false" />
-    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
-
-    <application
-        android:allowBackup="false"
-        android:banner="@drawable/banner"
-        android:directBootAware="true"
-        android:icon="@drawable/icon"
-        android:label="@string/app_name"
-        android:supportsRtl="true"
-        android:theme="@android:style/Theme.Material.NoActionBar">
-
-        <activity
-            android:name=".MainActivity"
-            android:excludeFromRecents="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <!-- ADB-shell-only control surface. DUMP is held by shell/system, not
-             ordinary third-party applications. Actions are allowlisted in code. -->
-        <activity
-            android:name=".ControlActivity"
-            android:excludeFromRecents="true"
-            android:exported="true"
-            android:permission="android.permission.DUMP"
-            android:theme="@android:style/Theme.NoDisplay" />
-
-        <receiver
-            android:name=".BootReceiver"
-            android:directBootAware="true"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter android:priority="1000">
-                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.USER_UNLOCKED" />
-                <action android:name="android.intent.action.USER_PRESENT" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-            </intent-filter>
-        </receiver>
-
-        <receiver
-            android:name=".BootAdminReceiver"
-            android:description="@string/admin_description"
-            android:enabled="true"
-            android:exported="true"
-            android:label="@string/admin_name"
-            android:permission="android.permission.BIND_DEVICE_ADMIN">
-            <meta-data
-                android:name="android.app.device_admin"
-                android:resource="@xml/device_admin" />
-            <intent-filter>
-                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
-            </intent-filter>
-        </receiver>
-
-        <service
-            android:name=".RecoveryService"
-            android:directBootAware="true"
-            android:enabled="true"
-            android:exported="false" />
-
-        <service
-            android:name=".RecoveryJobService"
-            android:directBootAware="true"
-            android:enabled="true"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <service
-            android:name=".BootAccessibilityService"
-            android:directBootAware="true"
-            android:enabled="true"
-            android:exported="true"
-            android:label="@string/accessibility_name"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_service" />
-        </service>
-    </application>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.redmi.tvtoolkit" android:versionCode="2" android:versionName="0.2.0">
+ <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="34"/>
+ <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+ <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"/>
+ <uses-feature android:name="android.software.leanback" android:required="false"/>
+ <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
+ <queries>
+  <intent><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.HOME"/></intent>
+  <intent><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LEANBACK_LAUNCHER"/></intent>
+ </queries>
+ <application android:allowBackup="false" android:directBootAware="true" android:icon="@drawable/icon" android:banner="@drawable/banner" android:label="@string/app_name" android:theme="@android:style/Theme.Material.NoActionBar">
+  <activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/><category android:name="android.intent.category.LEANBACK_LAUNCHER"/></intent-filter></activity>
+  <activity android:name=".ControlActivity" android:exported="true" android:permission="android.permission.DUMP" android:theme="@android:style/Theme.NoDisplay"/>
+  <receiver android:name=".ToolkitControlReceiver" android:exported="true" android:permission="android.permission.DUMP"/>
+  <receiver android:name=".BootReceiver" android:exported="true" android:directBootAware="true"><intent-filter><action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.USER_UNLOCKED"/><action android:name="android.intent.action.MY_PACKAGE_REPLACED"/></intent-filter></receiver>
+  <service android:name=".HomeOverrideService" android:exported="true" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" android:label="@string/home_override_name"><intent-filter><action android:name="android.accessibilityservice.AccessibilityService"/></intent-filter><meta-data android:name="android.accessibilityservice" android:resource="@xml/home_override_service"/></service>
+  <service android:name=".BootAccessibilityService" android:exported="true" android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" android:label="@string/accessibility_name"><intent-filter><action android:name="android.accessibilityservice.AccessibilityService"/></intent-filter><meta-data android:name="android.accessibilityservice" android:resource="@xml/accessibility_service"/></service>
+  <service android:name=".RecoveryService" android:exported="false"/><service android:name=".RecoveryJobService" android:exported="false" android:permission="android.permission.BIND_JOB_SERVICE"/>
+ </application>
 </manifest>
