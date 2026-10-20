@@ -1,0 +1,17 @@
+[
+  {
+    "File": "com.xiaomi.mitv.tvmanager-0.apk",
+    "Bytes": 7501970,
+    "SHA256": "782cf92220b01ec0d4214d3592df2643f77c23fb1c3ca1dddac9e772bb8e382b"
+  },
+  {
+    "File": "com.mitv.tvhome-0.apk",
+    "Bytes": 91461586,
+    "SHA256": "f0a5b149db71ba5660a69bccdd89859668fee13f3a03065ded64fb8d3af04986"
+  },
+  {
+    "File": "com.xiaomi.mitv.settings-0.apk",
+    "Bytes": 32951233,
+    "SHA256": "54db7165c94ea2429015075ed1714d143f0012a1446bd077bb9d114407a0cce9"
+  }
+]

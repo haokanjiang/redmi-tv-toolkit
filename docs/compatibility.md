@@ -1,5 +1,9 @@
 # 兼容性
 
+## MFTR0 静态调查（尚未验证运行支持）
+
+MiTV-MFTR0 / `freeguy` / `OS3.0.107.0.UFTMATV` 已完成实际安装 APK 的只读静态调查，详见 [start_3rd_app 技术报告](mftr0-start-3rd-app-static-analysis.md)。固件存在目标接口及 TVHome 消费路径，但当前 helper 的 `blueplanet` 门禁不接受该设备；本次未执行 Provider 调用或恢复动作，不将它列为已验证兼容。
+
 ## 已验证
 
 | 项目 | 值 |
