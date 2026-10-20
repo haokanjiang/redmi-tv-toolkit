@@ -11,3 +11,12 @@
 各 ZIP 的 SHA-256 依次为 `8b5092e8acf90f192a6af4e8c3dfafc48889c95c78ac690f6acb0f0547a7d187`、`f260da6e0fc6c26451ba1edf6bc10274051cbcd863f56d915be842345243102d`、`61303eb65467cbd4bd8c060e47f576b3add903e5c804feb95b1bfe1752134103`。`SHA256.json` 记录各 APK 的字节数及摘要。三个 ZIP 均为普通 Git 文件，解压即可得到 APK。
 
 小米及相关软件的权利归各自权利人所有。此目录仅记录该固件的原始样本与校验信息，不能用这些 APK 判断其他型号或固件版本的行为。
+
+## 追加系统分析样本（2026-10-21）
+
+| ZIP | 内容 | 实际安装路径 | 说明 |
+| --- | --- | --- | --- |
+| `PermissionController-mftr0.apk.zip` | `PermissionController-mftr0.apk` | `/apex/com.android.permission/priv-app/PermissionController@UQ1A.240105.004.A1/PermissionController.apk` | 设备报告 versionName `33 system image`、versionCode `330000000`、targetSdk 34；用于 HOME RoleController 分析。 |
+| `services-mftr0.jar.zip` | `services-mftr0.jar` | `/system/framework/services.jar` | MFTR0 的 system_server framework DEX，包含 PackageManager shell 与 preferred activity 实现。 |
+
+设备指纹：`xiaomi/freeguy/freeguy:14/UQ1A.240105.004.A1/OS3.0.107.0.UFTMATV:user/release-keys`。两个文件从设备以只读 ADB `pull` 获取。原件与归档 SHA-256、字节数见 `MFTR0-SystemArtifacts-SHA256.json`。归档仅含原始 APK/JAR，没有 DEX 单独导出或 JADX 源码。厂商软件权利归各自权利人所有；样本仅适用于此设备和固件。

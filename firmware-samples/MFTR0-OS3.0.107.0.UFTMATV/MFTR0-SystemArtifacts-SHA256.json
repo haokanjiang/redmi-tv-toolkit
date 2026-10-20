@@ -1,0 +1,18 @@
+[
+  {
+    "File": "PermissionController-mftr0.apk",
+    "Bytes": 9719786,
+    "SHA256": "4c5033de323e47974ae92750e48e67e301c6049c8444440804d4b79f91958750",
+    "Archive": "PermissionController-mftr0.apk.zip",
+    "ArchiveBytes": 4138593,
+    "ArchiveSHA256": "6b21fae823ba33e8362b00ff7723b8b7adb9f6978ab2e8a11c9e9400db59a700"
+  },
+  {
+    "File": "services-mftr0.jar",
+    "Bytes": 21574644,
+    "SHA256": "fa6cb988758968decfcf540e3a5874b443c0d6e1b5a85dfd3f2379c96a69c1c8",
+    "Archive": "services-mftr0.jar.zip",
+    "ArchiveBytes": 9467638,
+    "ArchiveSHA256": "379bedd1b6789e4eaa77316bfdc84a1eae38e92e6cb9c649e31926c4f812c743"
+  }
+]
